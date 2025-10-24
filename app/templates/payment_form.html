@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulaire de Paiement</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .form-title {
+            text-align: center;
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        input[type="number"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background-color: #fafafa;
+        }
+
+        input[type="text"]:focus,
+        input[type="tel"]:focus,
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background-color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        /* Style pour les champs avec erreurs */
+        input.error {
+            border-color: #e74c3c;
+            background-color: #fdf2f2;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        /* Styles pour les erreurs */
+        .errorlist {
+            list-style: none;
+            margin: 5px 0 0 0;
+            padding: 0;
+        }
+
+        .errorlist li {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+        }
+
+        .errorlist li:before {
+            content: "⚠ ";
+            margin-right: 5px;
+        }
+
+        /* Messages d'erreur générale du formulaire */
+        .form-errors {
+            background-color: #fdf2f2;
+            border: 1px solid #e74c3c;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 20px;
+            color: #e74c3c;
+        }
+
+        /* Animation d'entrée */
+        .container {
+            animation: slideIn 0.5s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .form-title {
+                font-size: 24px;
+            }
+        }
+
+        /* Animation d'erreur */
+        .shake {
+            animation: shake 0.5s ease-in-out;
+        }
+
+        @keyframes shake {
+
+            0%,
+            20%,
+            40%,
+            60%,
+            80% {
+                transform: translateX(-5px);
+            }
+
+            10%,
+            30%,
+            50%,
+            70%,
+            90% {
+                transform: translateX(5px);
+            }
+
+            100% {
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="form-title">Formulaire de Paiement</h1>
+
+        <!-- Affichage des erreurs non liées à des champs spécifiques -->
+        {% if form.non_field_errors %}
+        <div class="form-errors">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        {% if messages %}
+        {% for message in messages %}
+        <div class="form-errors">
+            {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.lastname.id_for_label }}">{{ form.lastname.label }} <span
+                        class="required">*</span></label>
+                {{ form.lastname }}
+                {% if form.lastname.errors %}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        document.getElementById('{{ form.lastname.id_for_label }}').classList.add('error', 'shake');
+                    });
+                </script>
+                {% endif %}
+                {{ form.lastname.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.firstname.id_for_label }}">{{ form.firstname.label }} <span
+                        class="required">*</span></label>
+                {{ form.firstname }}
+                {% if form.firstname.errors %}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        document.getElementById('{{ form.firstname.id_for_label }}').classList.add('error', 'shake');
+                    });
+                </script>
+                {% endif %}
+                {{ form.firstname.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.phone.id_for_label }}">{{ form.phone.label }} <span
+                        class="required">*</span></label>
+                {{ form.phone }}
+                {% if form.phone.errors %}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        document.getElementById('{{ form.phone.id_for_label }}').classList.add('error', 'shake');
+                    });
+                </script>
+                {% endif %}
+                {{ form.phone.errors }}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.amount.id_for_label }}">{{ form.amount.label }} <span
+                        class="required">*</span></label>
+                {{ form.amount }}
+                {% if form.amount.errors %}
+                <script>
+                    document.addEventListener('DOMContentLoaded', function () {
+                        document.getElementById('{{ form.amount.id_for_label }}').classList.add('error', 'shake');
+                    });
+                </script>
+                {% endif %}
+                {{ form.amount.errors }}
+            </div>
+
+            <button type="submit" class="btn-submit">Valider le paiement</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #e1e1e1;">
+            <a href="{% url 'app:payment-list' %}"
+                style="color: #667eea; text-decoration: none; font-weight: 500; display: inline-flex; align-items: center; gap: 5px;">
+                📋 Voir tous les paiements
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Script pour améliorer l'UX
+        document.addEventListener('DOMContentLoaded', function () {
+            // Supprimer les classes d'erreur quand l'utilisateur commence à taper
+            const inputs = document.querySelectorAll('input');
+            inputs.forEach(function (input) {
+                input.addEventListener('input', function () {
+                    this.classList.remove('error', 'shake');
+                });
+            });
+
+            // Validation en temps réel pour le téléphone
+            const phoneInput = document.getElementById('{{ form.phone.id_for_label }}');
+            if (phoneInput) {
+                phoneInput.addEventListener('input', function () {
+                    let value = this.value;
+                    // Auto-format du numéro de téléphone
+                    if (value.length > 0 && !value.startsWith('+226')) {
+                        if (value.startsWith('226')) {
+                            this.value = '+' + value;
+                        } else if (/^\d/.test(value)) {
+                            this.value = '+226 ' + value;
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+
+</html>

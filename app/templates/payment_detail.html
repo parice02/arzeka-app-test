@@ -1,0 +1,630 @@
+{% load payment_filters %}
+
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Détails de la Transaction - {{ payment.reference }}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .reference {
+            font-family: 'Courier New', monospace;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .back-button {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-cancelled {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .detail-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: #555;
+        }
+
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+            text-align: right;
+        }
+
+        .amount {
+            font-size: 24px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .timeline-item {
+            position: relative;
+            margin-bottom: 25px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -37px;
+            top: 25px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #667eea;
+            border: 3px solid white;
+            box-shadow: 0 0 0 3px #dee2e6;
+        }
+
+        .timeline-item:last-child::after {
+            content: '';
+            position: absolute;
+            left: -30px;
+            top: 37px;
+            bottom: -25px;
+            width: 2px;
+            background: white;
+        }
+
+        .timeline-status {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .timeline-time {
+            font-size: 12px;
+            color: #6c757d;
+            margin-bottom: 10px;
+        }
+
+        .timeline-description {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        .json-data {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-top: 15px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .json-key {
+            color: #68d391;
+        }
+
+        .json-string {
+            color: #fbb6ce;
+        }
+
+        .json-number {
+            color: #90cdf4;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .collapsible:hover {
+            background: #e9ecef;
+        }
+
+        .collapsible.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .collapsible-content {
+            display: none;
+            overflow: hidden;
+        }
+
+        .collapsible-content.active {
+            display: block;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .back-button {
+                position: relative;
+                left: auto;
+                top: auto;
+                transform: none;
+                margin-bottom: 15px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                justify-content: center;
+            }
+
+            /* Messages d'erreur générale du formulaire */
+            .alert-info {
+                background-color: #fdf2f2;
+                border: 1px solid #e74c3c;
+                border-radius: 5px;
+                padding: 10px;
+                margin-bottom: 20px;
+                color: #3c72e7;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <a href="{% url 'app:payment-list' %}" class="back-button">
+                ← Retour
+            </a>
+            <h1>💳 Détails de la Transaction</h1>
+            <div class="reference">{{ payment.reference }}</div>
+        </div>
+
+        <div class="content">
+            <!-- Statut actuel -->
+            <div style="text-align: center;">
+                <span class="status-badge status-{{ payment.status }}">
+                    {{ payment.get_status_display }}
+                </span>
+            </div>
+
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert-info">
+                {{ message|safe }}
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <!-- Actions disponibles -->
+            {% if can_verify or can_cancel %}
+            <div class="actions">
+                {% if can_verify %}
+                <button class="btn btn-success" onclick="verifyPayment({{ payment.id }})">
+                    🔍 Vérifier le statut
+                </button>
+                {% endif %}
+                {% if can_cancel %}
+                <button class="btn btn-danger" onclick="cancelPayment({{ payment.id }})">
+                    ❌ Annuler
+                </button>
+                {% endif %}
+                <a href="{% url 'app:payment-list' %}" class="btn btn-primary">
+                    📋 Retour à la liste
+                </a>
+            </div>
+            {% endif %}
+
+            <!-- Grille des détails -->
+            <div class="details-grid">
+                <!-- Informations client -->
+                <div class="detail-section">
+                    <h3 class="section-title">👤 Informations Client</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Nom complet:</span>
+                        <span class="detail-value">{{ payment.full_name }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Prénom:</span>
+                        <span class="detail-value">{{ payment.firstname }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Nom:</span>
+                        <span class="detail-value">{{ payment.lastname }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Téléphone:</span>
+                        <span class="detail-value">{{ payment.phone }}</span>
+                    </div>
+                </div>
+
+                <!-- Informations transaction -->
+                <div class="detail-section">
+                    <h3 class="section-title">💰 Détails Transaction</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Montant:</span>
+                        <span class="detail-value amount">{{ payment.formatted_amount }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Référence eTimbre:</span>
+                        <span class="detail-value">{{ payment.reference }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Référence paiement:</span>
+                        <span class="detail-value">{{ payment.transaction_id }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Statut:</span>
+                        <span class="detail-value">{{ payment.get_status_display }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Créé il y a:</span>
+                        <span class="detail-value">{{ duration_since_creation }}</span>
+                    </div>
+                </div>
+
+                <!-- Dates importantes -->
+                <div class="detail-section">
+                    <h3 class="section-title">📅 Historique</h3>
+                    <div class="detail-item">
+                        <span class="detail-label">Date de création:</span>
+                        <span class="detail-value">{{ payment.created_at|date:"d/m/Y à H:i" }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-label">Dernière modification:</span>
+                        <span class="detail-value">{{ payment.updated_at|date:"d/m/Y à H:i" }}</span>
+                    </div>
+                    {% if payment.created_at != payment.updated_at %}
+                    <div class="detail-item">
+                        <span class="detail-label">Modifié il y a:</span>
+                        <span class="detail-value">{{ payment.updated_at|timesince }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Timeline des statuts -->
+            <div class="detail-section">
+                <h3 class="section-title">📈 Chronologie des Statuts</h3>
+                <div class="timeline">
+                    {% for history in status_history %}
+                    <div class="timeline-item">
+                        <div class="timeline-status">{{ history.label }}</div>
+                        <div class="timeline-time">{{ history.timestamp|date:"d/m/Y à H:i" }}</div>
+                        <div class="timeline-description">{{ history.description }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Données techniques (collapsibles) -->
+            {% if payment.request_data or payment.intermediary_response or payment.final_response %}
+            <div class="detail-section">
+                <h3 class="section-title">🔧 Données Techniques</h3>
+
+                {% if payment.request_data %}
+                <div class="collapsible" onclick="toggleCollapsible(this)">
+                    📤 Données de la requête initiale
+                </div>
+                <div class="collapsible-content">
+                    <div class="json-data">{{ payment.request_data|pprint }}</div>
+                </div>
+                {% endif %}
+
+                {% if payment.intermediary_response %}
+                <div class="collapsible" onclick="toggleCollapsible(this)">
+                    🔄 Réponse intermédiaire
+                </div>
+                <div class="collapsible-content">
+                    <div class="json-data">{{ payment.intermediary_response|pprint }}</div>
+                </div>
+                {% endif %}
+
+                {% if payment.final_response %}
+                <div class="collapsible" onclick="toggleCollapsible(this)">
+                    ✅ Réponse finale
+                </div>
+                <div class="collapsible-content">
+                    <div class="json-data">{{ payment.final_response|pprint }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <!-- Actions finales -->
+            <div class="actions">
+                <a href="{% url 'app:payment-form' %}" class="btn btn-primary">
+                    ➕ Nouveau Paiement
+                </a>
+                <a href="{% url 'app:payment-list' %}" class="btn btn-primary">
+                    📋 Liste des Paiements
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleCollapsible(element) {
+            element.classList.toggle('active');
+            const content = element.nextElementSibling;
+            content.classList.toggle('active');
+        }
+
+        function verifyPayment(paymentId) {
+            const btn = event.target;
+            btn.disabled = true;
+            btn.textContent = '⏳ Vérification...';
+
+            fetch(`/verify-payment/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({payment_id: paymentId})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(`Statut mis à jour: ${data.status}\n${data.message}`);
+                        location.reload();
+                    } else {
+                        alert(`Erreur: ${data.message}`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    alert('Erreur de connexion');
+                })
+                .finally(() => {
+                    btn.disabled = false;
+                    btn.textContent = '🔍 Vérifier le statut';
+                });
+        }
+
+        function cancelPayment(paymentId) {
+            if (confirm('Êtes-vous sûr de vouloir annuler ce paiement ?')) {
+                // Ici vous pouvez ajouter la logique d'annulation
+                alert('Fonctionnalité d\'annulation à implémenter');
+            }
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Liste des Paiements</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 5px;
+            text-align: center;
+            min-width: 150px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+            font-size: 12px;
+            padding: 8px 16px;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-success:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+            font-size: 12px;
+            padding: 6px 12px;
+            margin: 2px;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+
+        th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+
+        tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .status-cancelled {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .amount {
+            font-weight: bold;
+            color: #28a745;
+        }
+
+        .reference {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .reference-link {
+            font-family: 'Courier New', monospace;
+            background: #f8f9fa;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            text-decoration: none;
+            color: #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .reference-link:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 30px;
+            gap: 10px;
+        }
+
+        .pagination a,
+        .pagination span {
+            padding: 10px 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #667eea;
+        }
+
+        .pagination .current {
+            background: #667eea;
+            color: white;
+        }
+
+        .pagination a:hover {
+            background: #f8f9fa;
+        }
+
+        .no-payments {
+            text-align: center;
+            padding: 50px;
+            color: #6c757d;
+        }
+
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .success-message {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 20px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+
+            .stats {
+                flex-direction: column;
+            }
+
+            .actions {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th,
+            td {
+                padding: 10px 8px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>💳 Liste des Paiements</h1>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">{{ total_payments }}</div>
+                    <div class="stat-label">Total</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ pending_payments }}</div>
+                    <div class="stat-label">En attente</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">{{ completed_payments }}</div>
+                    <div class="stat-label">Terminés</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content">
+            <div class="actions">
+                <h2>Gestion des Paiements</h2>
+                <a href="{% url 'app:payment-form' %}" class="btn btn-primary">
+                    ➕ Nouveau Paiement
+                </a>
+            </div>
+
+            {% if payments %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Référence</th>
+                            <th>Client</th>
+                            <th>Téléphone</th>
+                            <th>Montant</th>
+                            <th>Statut</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr id="payment-row-{{ payment.id }}">
+                            <td>
+                                {{forloop.counter}}
+                            </td>
+                            <td>
+                                {{ payment.reference }}
+                            </td>
+                            <td>
+                                <strong>{{ payment.full_name }}</strong>
+                            </td>
+                            <td>{{ payment.phone }}</td>
+                            <td>
+                                <span class="amount">{{ payment.formatted_amount }}</span>
+                            </td>
+                            <td>
+                                <span class="status status-{{ payment.status }}" id="status-{{ payment.id }}">
+                                    {{ payment.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ payment.created_at|date:"d/m/Y H:i" }}</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <a href="{% url 'app:payment-detail' payment.id %}" class="btn btn-info">
+                                        👁️ Détails
+                                    </a>
+                                    <button {% if payment.status == "completed" %}disabled{% endif %}
+                                        class="btn btn-success verify-btn" onclick="verifyPayment({{ payment.id }})"
+                                        id="verify-btn-{{ payment.id }}">
+                                        🔍 Vérifier
+                                    </button>
+                                </div>
+                                <div id="message-{{ payment.id }}" style="margin-top: 5px; font-size: 12px;"></div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page=1">&laquo; Premier</a>
+                <a href="?page={{ page_obj.previous_page_number }}">Précédent</a>
+                {% endif %}
+
+                <span class="current">
+                    Page {{ page_obj.number }} sur {{ page_obj.paginator.num_pages }}
+                </span>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}">Suivant</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}">Dernier &raquo;</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="no-payments">
+                <h3>Aucun paiement trouvé</h3>
+                <p>Commencez par créer votre premier paiement.</p>
+                <a href="{% url 'app:payment-form' %}" class="btn btn-primary" style="margin-top: 20px;">
+                    ➕ Créer un Paiement
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        function verifyPayment(paymentId) {
+            const btn = document.getElementById(`verify-btn-${paymentId}`);
+            const messageDiv = document.getElementById(`message-${paymentId}`);
+            const statusSpan = document.getElementById(`status-${paymentId}`);
+            const row = document.getElementById(`payment-row-${paymentId}`);
+
+            // Désactiver le bouton et afficher l'état de chargement
+            btn.disabled = true;
+            btn.textContent = '⏳ Vérification...';
+            row.classList.add('loading');
+            messageDiv.innerHTML = '';
+
+            // Effectuer la requête AJAX
+            fetch(`{% url 'app:verify-payment'%}?paymentRequestID=${paymentId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({})
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Mettre à jour le statut
+                        statusSpan.textContent = data.status;
+                        statusSpan.className = `status status-${getStatusClass(data.status)}`;
+
+                        // Afficher le message de succès
+                        messageDiv.innerHTML = `<div class="success-message">${data.message}</div>`;
+                    } else {
+                        // Afficher le message d'erreur
+                        messageDiv.innerHTML = `<div class="error-message">${data.message}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Erreur:', error);
+                    messageDiv.innerHTML = `<div class="error-message">Erreur de connexion</div>`;
+                })
+                .finally(() => {
+                    // Réactiver le bouton
+                    btn.disabled = false;
+                    btn.textContent = '🔍 Vérifier';
+                    row.classList.remove('loading');
+
+                    // Masquer le message après 5 secondes
+                    setTimeout(() => {
+                        messageDiv.innerHTML = '';
+                    }, 5000);
+                });
+        }
+
+        function getStatusClass(status) {
+            const statusMap = {
+                'En attente': 'pending',
+                'En cours de traitement': 'processing',
+                'Terminé': 'completed',
+                'Échoué': 'failed',
+                'Annulé': 'cancelled'
+            };
+            return statusMap[status] || 'pending';
+        }
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Auto-refresh de la page toutes les 30 secondes (optionnel)
+        // setInterval(() => {
+        //     location.reload();
+        // }, 30000);
+    </script>
+</body>
+
+</html>
