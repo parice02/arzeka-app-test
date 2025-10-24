@@ -12,9 +12,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 
+import environ
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
+environ.Env.read_env(env_file=str(BASE_DIR / "web" / ".env.local"))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
@@ -26,6 +30,11 @@ SECRET_KEY = "django-insecure-^dewpbjy!0_uvdur7zlzhkb2j850ic9q(_1#*+1)antfm-ozc(
 DEBUG = True
 
 ALLOWED_HOSTS = []
+
+FASOARZEKA_USERNAME = env.str("FASOARZEKA_USERNAME")
+FASOARZEKA_PASSWORD = env.str("FASOARZEKA_PASSWORD")
+FASOARZEKA_HASHSECRET = env.str("FASOARZEKA_HASHSECRET")
+FASOARZEKA_MERCHANTID = env.str("FASOARZEKA_MERCHANTID")
 
 
 # Application definition

@@ -1,2 +1,3 @@
 Django==5.2.7
+django-environ
 fasoarzeka @ git+https://github.com/parice02/fasoarzeka.git@ea85e9705914411c1958139fb5056a8eaf329b64
