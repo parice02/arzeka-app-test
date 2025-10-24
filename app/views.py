@@ -5,16 +5,18 @@ from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
 from django.views.decorators.csrf import csrf_exempt
-from django.db import models
+from django.conf import settings
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import CreateView, DetailView, ListView, View
 from fasoarzeka import check_payment, initiate_payment
 from fasoarzeka.exceptions import ArzekaAPIError
 
-from app.constant import FASOARZEKA_HASHSECRET, FASOARZEKA_MERCHANTID
 from app.forms import PaymentForm
 from app.models import Payment
 from web.utils import convert_arzeka_payment_status, get_reference
+
+FASOARZEKA_HASHSECRET = getattr(settings, "FASOARZEKA_HASHSECRET", None)
+FASOARZEKA_MERCHANTID = getattr(settings, "FASOARZEKA_MERCHANTID", None)
 
 
 class PaymentFormView(CreateView):

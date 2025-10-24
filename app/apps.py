@@ -6,7 +6,10 @@ class AppConfig(AppConfig):
     name = "app"
 
     def ready(self):
+        from django.conf import settings
         from fasoarzeka import authenticate
-        from app.constant import FASOARZEKA_PASSWORD, FASOARZEKA_USERNAME
+
+        FASOARZEKA_USERNAME = getattr(settings, "FASOARZEKA_USERNAME", None)
+        FASOARZEKA_PASSWORD = getattr(settings, "FASOARZEKA_PASSWORD", None)
 
         authenticate(FASOARZEKA_USERNAME, FASOARZEKA_PASSWORD)
