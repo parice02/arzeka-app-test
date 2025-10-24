@@ -6,10 +6,7 @@ from app.models import Payment
 from fasoarzeka import initiate_payment, check_payment, authenticate
 from fasoarzeka.exceptions import ArzekaAPIError
 
-from app.constant import (
-    FASOARZEKA_HASHSECRET,
-    FASOARZEKA_MERCHANTID,
-)
+
 
 
 class PaymentForm(forms.ModelForm):
